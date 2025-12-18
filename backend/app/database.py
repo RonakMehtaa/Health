@@ -2,6 +2,7 @@ from sqlalchemy import Column, Integer, Float, String, Date, DateTime, create_en
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from datetime import datetime
+import os
 
 Base = declarative_base()
 
@@ -58,8 +59,15 @@ class DerivedMetric(Base):
 
 
 # Database setup
-DATABASE_URL = "sqlite:///./healthstats.db"
-engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./healthstats.db")
+
+# Handle SQLite vs PostgreSQL connection arguments
+if DATABASE_URL.startswith("sqlite"):
+    engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
+else:
+    # PostgreSQL or other databases don't need check_same_thread
+    engine = create_engine(DATABASE_URL)
+
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
